@@ -1,0 +1,85 @@
+#%RAML 1.0
+title: logging-process
+version: 1.0
+baseUri: http://api.samplehost.com
+types:
+  TestType:
+    type: object
+    properties:
+      id: number
+      optional?: string
+      expanded:
+        type: object
+        properties:
+          count: number
+/transactions:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "message" : "Hello World"
+              }
+  post:
+    description: |
+      Create a new resource
+    body:
+      application/json: !!null
+    responses:
+      201:
+        description: |
+          Succesfully created a new resource
+        headers:
+          Location:
+            description: |
+              Location of the newly created resource
+            type: string
+            required: false
+/errors:
+  get:
+    description: |
+      Retrieve resource
+    responses:
+      200:
+        description: |
+          Succesfully retrieved resource
+  post:
+    description: |
+      Create a new resource
+    body:
+      application/json: !!null
+    responses:
+      201:
+        description: |
+          Succesfully created a new resource
+        headers:
+          Location:
+            description: |
+              Location of the newly created resource
+            type: string
+            required: false
+/warnings:
+  get:
+    description: |
+      Retrieve resource
+    responses:
+      200:
+        description: |
+          Succesfully retrieved resource
+  post:
+    description: |
+      Create a new resource
+    body:
+      application/json: !!null
+    responses:
+      201:
+        description: |
+          Succesfully created a new resource
+        headers:
+          Location:
+            description: |
+              Location of the newly created resource
+            type: string
+            required: false
