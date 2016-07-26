@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
-    <flow name="transactions"/>
-    <flow name="warnings"/>
-    <flow name="errors"/>
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <jms:activemq-connector name="Active_MQ" specification="1.1" username="admin" password="admin" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
+    <flow name="transactions">
+        <logger message="#[payload]" level="INFO" doc:name="Log Transaction"/>
+        <dw:transform-message doc:name="Transform Message"/>
+        <jms:outbound-endpoint topic="transaction" connector-ref="Active_MQ" doc:name="JMS-transactionTopic"/>
+    </flow>
+    <flow name="warnings">
+        <logger message="#[payload]" level="INFO" doc:name="Log Warning"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <jms:outbound-endpoint topic="warning" connector-ref="Active_MQ" doc:name="JMS-warningTopic"/>
+    </flow>
+    <flow name="errors">
+        <logger message="#[payload]" level="INFO" doc:name="Log Error"/>
+        <dw:transform-message doc:name="Transform Message"/>
+        <jms:outbound-endpoint topic="errors" connector-ref="Active_MQ" doc:name="JMS-errorTopic"/>
+    </flow>
 </mule>

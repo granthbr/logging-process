@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+	<context:property-placeholder location="mule.${mule.env}.properties" />
+	<http:listener-config name="http_request_logger"
+		host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration" />
+	<choice-exception-strategy name="configChoice_Exception_Strategy">
+		<catch-exception-strategy doc:name="Catch Exception Strategy">
+			<dw:transform-message doc:name="Transform Message">
+				<dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+			</dw:transform-message>
+			<logger level="INFO" doc:name="Logger" message="#[payload]"/>
+            <flow-ref name="enricherFlow" doc:name="enricherFlow"/>
+		</catch-exception-strategy>
+	</choice-exception-strategy>
+	<flow name="enricherFlow">
+		<enricher doc:name="Message Enricher">
+			<dw:transform-message doc:name="Transform Message">
+				<dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{code: 404,message: "Bad request for " ++ flowVars.var, reason: "Error Correlation ID, Sequence ID"}]]></dw:set-payload>
+			</dw:transform-message>
+		</enricher>
+	</flow>
+</mule>
